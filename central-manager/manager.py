@@ -12,12 +12,14 @@ import os
 from datetime import datetime
 import paho.mqtt.client as mqtt
 
-# ── Configuration ────────────────────────────────────────────────
-MQTT_BROKER   = "192.168.10.10"
-MQTT_PORT     = 8883
+# ── Configuration (env-overridable) ──────────────────────────────
+MQTT_BROKER   = os.getenv("FTM_BROKER", "192.168.10.10")
+USE_TLS       = os.getenv("FTM_USE_TLS", "false").lower() == "true"
+MQTT_PORT     = int(os.getenv("FTM_PORT", "8883" if USE_TLS else "1883"))
 MQTT_TOPIC    = "alerts/#"   # subscribes to all node alert topics
-CA_CERT       = "/etc/mosquitto/ca.crt"
-DB_PATH       = os.path.join(os.path.dirname(__file__), "alerts.db")
+CA_CERT       = os.getenv("FTM_CA_CERT", "/etc/mosquitto/certs/ca.crt")
+DB_PATH       = os.getenv("FTM_DB_PATH",
+                          os.path.join(os.path.dirname(__file__), "alerts.db"))
 
 # ── Database Setup ───────────────────────────────────────────────
 def init_db():
@@ -119,13 +121,13 @@ def main():
     client.on_connect    = on_connect
     client.on_message    = on_message
     client.on_disconnect = on_disconnect
+    client.reconnect_delay_set(min_delay=1, max_delay=30)
 
-    client.tls_set(
-        ca_certs    = CA_CERT,
-        tls_version = ssl.PROTOCOL_TLS
-    )
+    if USE_TLS:
+        client.tls_set(ca_certs=CA_CERT, tls_version=ssl.PROTOCOL_TLS)
 
-    print(f"[{timestamp()}] Connecting to broker at {MQTT_BROKER}:{MQTT_PORT}...")
+    print(f"[{timestamp()}] Connecting to broker at {MQTT_BROKER}:{MQTT_PORT} "
+          f"(TLS={'on' if USE_TLS else 'off'})...")
     client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
 
     try:

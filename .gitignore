@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# project runtime artifacts
+central-manager/alerts.db
+*.db
+ground_truth.csv
+metrics.csv
+*.log

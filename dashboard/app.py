@@ -6,15 +6,17 @@ Reads alerts from SQLite and displays them in real time.
 
 import sqlite3
 import os
+import time
 import pandas as pd
 import streamlit as st
 from datetime import datetime
 
 # -- Configuration ------------------------------------------------
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "../central-manager/alerts.db"
+DB_PATH = os.getenv(
+    "FTM_DB_PATH",
+    os.path.join(os.path.dirname(__file__), "../central-manager/alerts.db"),
 )
+REFRESH_SECONDS = int(os.getenv("FTM_DASHBOARD_REFRESH", "10"))  # <= 60 per spec
 
 # -- Page Config --------------------------------------------------
 st.set_page_config(
@@ -142,6 +144,11 @@ st.divider()
 
 # -- Auto-refresh -------------------------------------------------
 st.caption(
-    f"Last refreshed: {datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')} UTC"
+    f"Last refreshed: {datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')} UTC "
+    f"(auto-refresh every {REFRESH_SECONDS}s)"
 )
-st.button("Refresh Now")
+if st.button("Refresh Now"):
+    st.rerun()
+
+time.sleep(REFRESH_SECONDS)
+st.rerun()
