@@ -206,9 +206,4 @@ def main():
             time.sleep(POLL_INTERVAL)
 
 if __name__ == "__main__":
-    main()#!/usr/bin/env python3
-"""
-Federated Threat Monitor — Edge Agent
-Monitors local logs, computes Z-score baseline profiling,
-and publishes DDoS volumetric anomaly alerts via MQTT over TLS.
-"""
+   
