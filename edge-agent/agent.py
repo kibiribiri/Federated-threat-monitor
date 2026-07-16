@@ -204,6 +204,6 @@ def main():
         except Exception as e:
             print(f"[{timestamp()}] Error: {e}")
             time.sleep(POLL_INTERVAL)
-
 if __name__ == "__main__":
+    main()
    
